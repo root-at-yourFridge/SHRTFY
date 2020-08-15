@@ -5,6 +5,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const randomstring = require('randomstring');
+// eslint-disable-next-line no-unused-vars
+const dotenv = require('dotenv').config();
 const app = express();
 
 // Regex for checking if the given url is in a valid format with protocol
@@ -37,7 +39,7 @@ app.get('/shorten', (req, res) => {
     storeInDB(url, slug);
     var shorturl = { // Object to be returned
         url: url,
-        short: `https://shrtfy.de/v/${slug}`
+        short: `${process.env.BASE_URL}v/${slug}`
     }
     res.send(shorturl);
 });
