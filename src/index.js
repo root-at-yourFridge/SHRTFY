@@ -1,3 +1,4 @@
+// Add requirements
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -6,46 +7,56 @@ const morgan = require('morgan');
 const randomstring = require('randomstring');
 const app = express();
 
+// Regex for checking if the given url is in a valid format with protocol
 const expression = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[+~%/.\w-_]*)?\??(?:[-+=&;%@.\w_]*)#?(?:[\w]*))?)/gi
 var regex = new RegExp(expression);
 
+// Initialize middleware
 app.use(helmet());
 app.use(bodyParser.json());
 app.use(cors());
 app.use(morgan('combined'));
 
+// Set database to connect to
 const Datastore = require('nedb'),
     db = new Datastore({ filename: './db/urls.db', autoload: true });
 
+// Endpoint to create a shortened url
 app.get('/shorten', (req, res) => {
     let url = req.headers.url;
     if(!url) {
-        res.send("No url specified");
+        res.send("No url specified"); // abort if url header is not set
         return;
     }
     if (!url.match(regex)) {
-        res.send("Invalid url");
+        res.send("Invalid url"); // abort if the given url is not in valid format
         return;
     }
 
     let slug = generateSlug();
-    putInDB(url, slug);
-    var shorturl = {
+    storeInDB(url, slug);
+    var shorturl = { // Object to be returned
         url: url,
         short: `https://shrtfy.de/v/${slug}`
     }
     res.send(shorturl);
 });
 
-app.get('/v/:slug', (req, res) => {
+app.get('/v/:slug', (req, res) => { // shrtfy.de/v/{random_code}
     db.find({ slug: req.params.slug }, function (err, docs) {
+        if(docs.length == 0) { // abort if slug not in database
+            res.send("Invalid slug");
+            return;
+        }
         console.log(docs);
         var url = docs[0].url;
         
-        res.redirect(url);
+        // if header "noredir" is present && != false redirect, else respond with object
+        req.headers.noredir ? res.redirect(url) : res.send({url: docs[0].url});
     });
 });
 
+// This is self-explainatory, isn't it?
 app.get('/info', (req, res) => {
     res.send({
         author: "Dennis Wiencke",
@@ -57,6 +68,7 @@ app.get('/info', (req, res) => {
     });
 });
 
+// Undocumented endpoint because why not...
 app.get('/message', (req, res) => {
     res.send({
         sender: "Dennis Wiencke",
@@ -81,6 +93,7 @@ app.get('/message', (req, res) => {
     });
 });
 
+// shortfy.de returns the basic usage
 app.get('/', (req, res) => {
     res.send({
         name: "SHRTFY is short for shortify",
@@ -106,7 +119,9 @@ app.listen(3001, () => {
     console.log('listening on port 3001');
 });
 
-function putInDB(url, slug) {
+// I'm ging to comment the stuff below at some other time, if I want to :D
+
+function storeInDB(url, slug) {
     var schema = {
         url: url,
         slug: slug
