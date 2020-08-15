@@ -116,7 +116,7 @@ app.get('/', (req, res) => {
 });
 
 app.listen(80, () => {
-    console.log('listening on port 3001');
+    console.log('listening on port 80');
 });
 
 // I'm ging to comment the stuff below at some other time, if I want to :D
