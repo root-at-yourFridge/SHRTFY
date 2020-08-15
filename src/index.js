@@ -57,6 +57,30 @@ app.get('/info', (req, res) => {
     });
 });
 
+app.get('/message', (req, res) => {
+    res.send({
+        sender: "Dennis Wiencke",
+        messages: [
+            {
+                receiver: "Mom",
+                content: "Hey mom, I hope I finally did something to make you proud"
+            },
+            {
+                receiver: "Dad",
+                content: "Huh!? You finally care 'bout me? I don't think so!"
+            },
+            {
+                receiver: "My girlfriend",
+                content: "I'm sorry for coding this much. I really love you. Please forgive me for what I said when I was debugging my code <3"
+            },
+            {
+                receiver: "Employers",
+                content: "Please fucking hire me. I don't want to be a store manager in a grocery store 'til I can retire :("
+            }
+        ]
+    });
+});
+
 app.get('/', (req, res) => {
     res.send({
         name: "SHRTFY is short for shortify",
