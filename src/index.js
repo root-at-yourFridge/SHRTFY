@@ -18,6 +18,7 @@ app.use(helmet());
 app.use(bodyParser.json());
 app.use(cors());
 app.use(morgan('combined'));
+app.use(express.static(__dirname, { dotfiles: 'allow'} ));
 
 // Set database to connect to
 const Datastore = require('nedb'),
@@ -54,7 +55,7 @@ var slug = req.params.slug;
         console.log(docs);
         var url = docs[0].url;
         
-        var redirect = (req.headers.noredir == true) ? false : true;
+        var redirect = (req.headers.noredir == "true") ? false : true;
 
         // if header "noredir" is present && != false redirect, else respond with object
         // req.headers.noredir ? res.redirect(url) : res.send({url: docs[0].url});
