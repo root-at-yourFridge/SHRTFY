@@ -54,7 +54,8 @@ app.get('/v/:slug', (req, res) => { // shrtfy.de/v/{random_code}
         var url = docs[0].url;
         
         // if header "noredir" is present && != false redirect, else respond with object
-        req.headers.noredir ? res.redirect(url) : res.send({url: docs[0].url});
+        // req.headers.noredir ? res.redirect(url) : res.send({url: docs[0].url});
+        res.redirect(url);
     });
 });
 
