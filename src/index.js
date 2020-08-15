@@ -19,6 +19,10 @@ const Datastore = require('nedb'),
 
 app.get('/shorten', (req, res) => {
     let url = req.headers.url;
+    if(!url) {
+        res.send("No url specified");
+        return;
+    }
     if (!url.match(regex)) {
         res.send("Invalid url");
         return;
