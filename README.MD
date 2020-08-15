@@ -23,3 +23,5 @@ Make a GET request to /info
 ```
 curl https://shrtfy.de/info
 ```
+
+## There are some more undocumented endpoints, though
