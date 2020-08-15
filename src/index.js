@@ -45,7 +45,8 @@ app.get('/shorten', (req, res) => {
 });
 
 app.get('/v/:slug', (req, res) => { // shrtfy.de/v/{random_code}
-    db.find({ slug: req.params.slug }, function (err, docs) {
+var slug = req.params.slug;
+    db.find({ slug: slug }, function (err, docs) {
         if(docs.length == 0) { // abort if slug not in database
             res.send("Invalid slug");
             return;
@@ -53,9 +54,11 @@ app.get('/v/:slug', (req, res) => { // shrtfy.de/v/{random_code}
         console.log(docs);
         var url = docs[0].url;
         
+        var redirect = (req.headers.noredir == true) ? false : true;
+
         // if header "noredir" is present && != false redirect, else respond with object
         // req.headers.noredir ? res.redirect(url) : res.send({url: docs[0].url});
-        res.redirect(url);
+        (redirect) ? res.redirect(url) : res.send({slug: slug, url: url});
     });
 });
 
