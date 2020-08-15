@@ -117,7 +117,7 @@ app.get('/', (req, res) => {
     });
 });
 
-app.listen(80, () => {
+app.listen(80, process.env.IP_ADDR,() => {
     console.log('listening on port 80');
 });
 
