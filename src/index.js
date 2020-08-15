@@ -89,7 +89,7 @@ app.get('/message', (req, res) => {
                 content: "Huh!? You finally care 'bout me? I don't think so!"
             },
             {
-                receiver: "My girlfriend",
+                receiver: "Michelle",
                 content: "I'm sorry for coding this much. I really love you. Please forgive me for what I said when I was debugging my code <3"
             },
             {
@@ -141,17 +141,17 @@ function storeInDB(url, slug) {
 }
 
 function generateSlug() {
-    let slug = randomstring.generate(7);
-    if(checkForUniqueSlug(slug) > 0) {
-        generateSlug();
+    let slug = randomstring.generate(7); // Generate a random string with length = 7
+    if(checkForUniqueSlug(slug) > 0) { // Recursive function call to handle a not unique slug
+        generateSlug(); // Generate another one
     } else {
-        return slug;
+        return slug; // Finally return the slug
     }
 }
 
 function checkForUniqueSlug(slug) {
     db.find({ slug: slug }, function (err, docs) {
         console.log(docs.length);
-        return docs.length;
+        return docs.length; // If docs.length > 1 there is an entry already, therefor the calling function will evaluate to false
     });
 }
