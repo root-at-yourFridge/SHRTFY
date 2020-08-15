@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const randomstring = require('randomstring');
 const app = express();
 
-var expression = /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/gi;
+const expression = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[+~%/.\w-_]*)?\??(?:[-+=&;%@.\w_]*)#?(?:[\w]*))?)/gi
 var regex = new RegExp(expression);
 
 app.use(helmet());
@@ -34,7 +34,6 @@ app.get('/shorten', (req, res) => {
         url: url,
         short: `https://shrtfy.de/v/${slug}`
     }
-    //console.log(req);
     res.send(shorturl);
 });
 
