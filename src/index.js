@@ -28,25 +28,11 @@ app.get('/shorten', (req, res) => {
     putInDB(url, slug);
     var shorturl = {
         url: url,
-        // FIXME: Replace localhost with shrtfy
         short: `https://shrtfy.de/v/${slug}`
-        // short: `http://localhost:3001/v/${slug}`
     }
     //console.log(req);
     res.send(shorturl);
 });
-
-// FIXME: REMOVE BEFORE FLIGHT!
-// app.get('/debug', (req, res) => {
-//     let url = req.headers.url;
-//     let slug = req.headers.slug;
-//     if (!url.match(regex)) {
-//         res.send("Invalid url");
-//         return;
-//     }
-
-//     res.send(checkForUniqueSlug(slug));
-// });
 
 app.get('/v/:slug', (req, res) => {
     db.find({ slug: req.params.slug }, function (err, docs) {
