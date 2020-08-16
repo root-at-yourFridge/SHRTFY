@@ -1,3 +1,6 @@
+// I'm sorry for my inconsistent comments. I just dont't like to comment my code...
+
+
 // Add requirements
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -30,33 +33,28 @@ db.ensureIndex({
 
 // Endpoint to create a shortened url
 app.get('/shorten', (req, res) => {
-    let url = req.headers.url;
-    let key = null;
-    let slug = null;
-    if (req.header('slug')) {
-        slug = req.header('slug');
-        if (checkForUniqueSlug(slug)) {
-            console.log("Slug is not unique");
-            res.send('Slug already exists');
-            return;
-        }
-    }
-    if (req.header('x-rapidapi-key')) key = req.header('x-rapidapi-key');
-    console.log(req.header('x-rapidapi-key'));
+    let url = req.headers.url; // url set in headers
+    let publicKey = null; // init public key
+    let slug = null; // init slug
+
+    if (req.header(process.env.PUBLIC_KEY)) publicKey = req.header(process.env.PUBLIC_KEY); // check if public key is set
+    console.log(req.header(process.env.PUBLIC_KEY));
+
     if (!url) {
         res.send("No url specified"); // abort if url header is not set
         return;
     }
+
     if (!url.match(regex)) {
         res.send("Invalid url"); // abort if the given url is not in valid format
         return;
     }
 
-    if (slug == null) slug = generateSlug();
+    slug = generateSlug();
     var schema = {
         url: url,
         slug: slug,
-        key: key
+        key: publicKey
     };
 
     db.insert(schema, function (err, newDoc) {
@@ -70,7 +68,66 @@ app.get('/shorten', (req, res) => {
             var shorturl = { // Object to be returned
                 url: url,
                 short: `${process.env.BASE_URL}v/${slug}`,
-                key: key
+                key: publicKey
+            }
+            res.send(shorturl);
+        }
+    });
+});
+
+app.get('/custom', (req, res) => {
+    let url = req.headers.url; // url set in headers
+    let publicKey = null ; // init public key (not required)
+    let slug = null; // init slug
+    if (req.header('slug')) { // check if header slug is set (not required)
+        slug = req.header('slug');
+    }
+
+    console.log(process.env.SECRET_KEY);
+    console.log(process.env.SECRET_VALUE);
+    console.log(req.header(process.env.SECRET_KEY));
+    if (!req.header(process.env.SECRET_KEY) || !req.header(process.env.SECRET_KEY) == process.env.SECRET_VALUE) {
+        console.log(req.header(process.env.SECRET_KEY));
+        res.send(process.env.SECRET_FAIL);
+        return;
+    }
+
+    if (req.header(process.env.PUBLIC_KEY)) publicKey = req.header(process.env.PUBLIC_KEY); // check if secret key is set
+    console.log(req.header(process.env.PUBLIC_KEY));
+
+    if (!url) {
+        res.send("No url specified"); // abort if url header is not set
+        return;
+    }
+
+    if (!url.match(regex)) {
+        res.send("Invalid url"); // abort if the given url is not in valid format
+        return;
+    }
+
+    if (slug == null) {
+        res.send("Slug is required"); // abort if slug is not set
+        return;
+    }
+
+    var schema = {
+        url: url,
+        slug: slug,
+        key: publicKey
+    };
+
+    db.insert(schema, function (err, newDoc) {
+        err ? console.log(`ERROR: ${err}`) : console.log("DONE");
+        console.log(newDoc);
+        if (newDoc == undefined) {
+            res.send("The slug is already in use");
+            return;
+        } else {
+            console.log("newDoc is not undefined");
+            var shorturl = { // Object to be returned
+                url: url,
+                short: `${process.env.BASE_URL}v/${slug}`,
+                key: publicKey
             }
             res.send(shorturl);
         }
@@ -87,11 +144,8 @@ app.get('/v/:slug', (req, res) => { // shrtfy.de/v/{random_code}
         console.log(docs);
         var url = docs[0].url;
 
-        var redirect = (req.headers.noredir == "true") ? false : true;
-
-        // if header "noredir" is present && != false redirect, else respond with object
-        // req.headers.noredir ? res.redirect(url) : res.send({url: docs[0].url});
-        (redirect) ? res.redirect(url) : res.send({ slug: slug, url: url });
+        // if header "noredir" is present redirect, else respond with object
+        (req.headers.noredir) ? res.redirect(url) : res.send({ slug: slug, url: url });
     });
 });
 
@@ -120,10 +174,10 @@ app.get('/message', (req, res) => {
                 receiver: "Dad",
                 content: "Huh!? You finally care 'bout me? I don't think so!"
             },
-            {
-                receiver: "Michelle",
-                content: "I'm sorry for coding this much. I really love you. Please forgive me for what I said when I was debugging my code <3"
-            },
+            // {
+            //     receiver: "Michelle",
+            //     content: "I'm sorry for coding this much. I really love you. Please forgive me for what I said when I was debugging my code <3"
+            // },
             {
                 receiver: "Employers",
                 content: "Please fucking hire me. I don't want to be a store manager in a grocery store 'til I can retire :("
@@ -132,7 +186,7 @@ app.get('/message', (req, res) => {
     });
 });
 
-// Modify the slug after creation (only available for rapidapi pro users)
+// Modify the slug after creation (only available for secret pro users)
 // app.get('/modify', (req, res) => {
 //     console.log(req.headers);
 //     if(!req.headers.slug) {
@@ -158,12 +212,12 @@ app.get('/message', (req, res) => {
 //         return;
 //     }
 //     console.log("Length is valid");
-//     if(!req.header('x-rapidapi-key')) {
-//         res.send("You have to be subscribed to the pro plan on rapidapi.com");
+//     if(!req.header(process.env.SECRET)) {
+//         res.send("You have to be subscribed to the pro plan on secret.com");
 //         return;
 //     }
 //     console.log("API key found");
-//     let key = req.header('x-rapidapi-key');
+//     let key = req.header(process.env.SECRET);
 //     if(auth(slug, key) > 0) {
 //         res.send("Authentication failed");
 //         return;
