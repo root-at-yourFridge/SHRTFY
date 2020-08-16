@@ -28,7 +28,15 @@ const Datastore = require('nedb'),
 app.get('/shorten', (req, res) => {
     let url = req.headers.url;
     let key = null;
+    let slug = null;
+    if(req.header('slug')) {
+        slug = req.header('slug');
+        if(checkForUniqueSlug(slug) > 0) {
+            res.send('Slug already exists');
+        }
+    }
     if(req.header('x-rapidapi-key')) key = req.header('x-rapidapi-key');
+    console.log(req.header('x-rapidapi-key'));
     if(!url) {
         res.send("No url specified"); // abort if url header is not set
         return;
@@ -38,8 +46,8 @@ app.get('/shorten', (req, res) => {
         return;
     }
 
-    let slug = generateSlug();
-    storeInDB(url, slug);
+    if(slug == null) slug = generateSlug();
+    storeInDB(url, slug, key);
     var shorturl = { // Object to be returned
         url: url,
         short: `${process.env.BASE_URL}v/${slug}`,
@@ -104,13 +112,57 @@ app.get('/message', (req, res) => {
 });
 
 // Modify the slug after creation (only available for rapidapi pro users)
-app.get('/modify', (req, res) => {
-    if(req.header('x-rapidapi-key') == (undefined || null || "")) {
-        res.send("You have to be subscribed to the pro plan on rapidapi.com");
-        return;
-    }
-    res.send("Not yet implemented");
-});
+// app.get('/modify', (req, res) => {
+//     console.log(req.headers);
+//     if(!req.headers.slug) {
+//         res.send("You need to provide a slug to be changed");
+//         return;
+//     }
+//     console.log("Slug is here");
+//     let slug = req.headers.slug;
+//     // FIXME: Get correct results
+//     if(checkIfSlugExists(slug) > 0) {
+//         res.send("The provided slug does not exist");
+//         return;
+//     }
+//     console.log("Slug exists in DB");
+//     if(!req.headers.newslug) {
+//         res.send("You need to provide new slug");
+//         return;
+//     }
+//     console.log("New slug is there");
+//     let newSlug = req.headers.newslug;
+//     if(newSlug.length < 4 || newSlug.length > 15) {
+//         res.send("Slug length must be between 4 and 15");
+//         return;
+//     }
+//     console.log("Length is valid");
+//     if(!req.header('x-rapidapi-key')) {
+//         res.send("You have to be subscribed to the pro plan on rapidapi.com");
+//         return;
+//     }
+//     console.log("API key found");
+//     let key = req.header('x-rapidapi-key');
+//     if(auth(slug, key) > 0) {
+//         res.send("Authentication failed");
+//         return;
+//     }
+//     console.log("Successfully authorized");
+//     if(checkForUniqueSlug(slug) > 0) {
+//         res.send("Slug unavailable");
+//         return;
+//     }
+//     console.log("Slug is unique");
+//     updateDatabase(slug, newSlug);
+//     res.send("Success!");
+// });
+
+// app.get('/test/:slug::key', (req, res) => {
+//     db.find({ slug: req.params.slug, key: req.params.key }, function (err, docs) {
+//         console.log(docs);
+//         res.send("docs");
+//       });
+// });
 
 // shortfy.de returns the basic usage
 app.get('/', (req, res) => {
@@ -140,10 +192,11 @@ app.listen(80, process.env.IP_ADDR,() => {
 
 // I'm ging to comment the stuff below at some other time, if I want to :D
 
-function storeInDB(url, slug) {
+function storeInDB(url, slug, key) {
     var schema = {
         url: url,
-        slug: slug
+        slug: slug,
+        key: key
     };
 
     db.insert(schema, function (err, newDoc) {
@@ -166,4 +219,27 @@ function checkForUniqueSlug(slug) {
         console.log(docs.length);
         return docs.length; // If docs.length > 1 there is an entry already, therefor the calling function will evaluate to false
     });
+}
+
+function auth(slug, key) {
+    db.find({slug: slug, key: key}, function(err, docs) {
+        console.log(`found entry with ${slug} and ${key}\nDoc: ${docs}`)
+        return docs.length;
+    });
+}
+
+function checkIfSlugExists(slug) {
+    db.find({slug: slug}, function(err, docs) {
+        console.log(`found ${docs.length} entries`);
+        return docs.length;
+        // return (docs.length > 0) ? false : true;
+    });
+}
+
+function updateDatabase(slug, newSlug) {
+    db.update({ slug: slug }, { slug: newSlug}, {}, function (err, numReplaced) {
+        if(err) return false;
+        console.log(`numreplaced: ${numReplaced}`);
+        return true;
+      });
 }
