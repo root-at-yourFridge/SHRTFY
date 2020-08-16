@@ -18,26 +18,32 @@ app.use(helmet());
 app.use(bodyParser.json());
 app.use(cors());
 app.use(morgan('combined'));
-app.use(express.static(__dirname, { dotfiles: 'allow'} ));
+app.use(express.static(__dirname, { dotfiles: 'allow' }));
 
 // Set database to connect to
 const Datastore = require('nedb'),
     db = new Datastore({ filename: './db/urls.db', autoload: true });
+db.ensureIndex({
+    fieldName: "slug",
+    unique: true
+}, (err) => console.log(err));
 
 // Endpoint to create a shortened url
 app.get('/shorten', (req, res) => {
     let url = req.headers.url;
     let key = null;
     let slug = null;
-    if(req.header('slug')) {
+    if (req.header('slug')) {
         slug = req.header('slug');
-        if(checkForUniqueSlug(slug) > 0) {
+        if (checkForUniqueSlug(slug)) {
+            console.log("Slug is not unique");
             res.send('Slug already exists');
+            return;
         }
     }
-    if(req.header('x-rapidapi-key')) key = req.header('x-rapidapi-key');
+    if (req.header('x-rapidapi-key')) key = req.header('x-rapidapi-key');
     console.log(req.header('x-rapidapi-key'));
-    if(!url) {
+    if (!url) {
         res.send("No url specified"); // abort if url header is not set
         return;
     }
@@ -46,31 +52,46 @@ app.get('/shorten', (req, res) => {
         return;
     }
 
-    if(slug == null) slug = generateSlug();
-    storeInDB(url, slug, key);
-    var shorturl = { // Object to be returned
+    if (slug == null) slug = generateSlug();
+    var schema = {
         url: url,
-        short: `${process.env.BASE_URL}v/${slug}`,
+        slug: slug,
         key: key
-    }
-    res.send(shorturl);
+    };
+
+    db.insert(schema, function (err, newDoc) {
+        err ? console.log(`ERROR: ${err}`) : console.log("DONE");
+        console.log(newDoc);
+        if (newDoc == undefined) {
+            res.send("The slug is already in use");
+            return;
+        } else {
+            console.log("newDoc is not undefined");
+            var shorturl = { // Object to be returned
+                url: url,
+                short: `${process.env.BASE_URL}v/${slug}`,
+                key: key
+            }
+            res.send(shorturl);
+        }
+    });
 });
 
 app.get('/v/:slug', (req, res) => { // shrtfy.de/v/{random_code}
-var slug = req.params.slug;
+    var slug = req.params.slug;
     db.find({ slug: slug }, function (err, docs) {
-        if(docs.length == 0) { // abort if slug not in database
+        if (docs.length == 0) { // abort if slug not in database
             res.send("Invalid slug");
             return;
         }
         console.log(docs);
         var url = docs[0].url;
-        
+
         var redirect = (req.headers.noredir == "true") ? false : true;
 
         // if header "noredir" is present && != false redirect, else respond with object
         // req.headers.noredir ? res.redirect(url) : res.send({url: docs[0].url});
-        (redirect) ? res.redirect(url) : res.send({slug: slug, url: url});
+        (redirect) ? res.redirect(url) : res.send({ slug: slug, url: url });
     });
 });
 
@@ -186,28 +207,13 @@ app.get('/', (req, res) => {
     });
 });
 
-app.listen(80, process.env.IP_ADDR,() => {
+app.listen(process.env.PORT, process.env.IP_ADDR, () => {
     console.log('listening on port 80');
 });
 
-// I'm ging to comment the stuff below at some other time, if I want to :D
-
-function storeInDB(url, slug, key) {
-    var schema = {
-        url: url,
-        slug: slug,
-        key: key
-    };
-
-    db.insert(schema, function (err, newDoc) {
-        err ? console.log("ERROR") : console.log("DONE");
-        console.log(newDoc);
-    });
-}
-
 function generateSlug() {
     let slug = randomstring.generate(7); // Generate a random string with length = 7
-    if(checkForUniqueSlug(slug) > 0) { // Recursive function call to handle a not unique slug
+    if (checkForUniqueSlug(slug) > 0) { // Recursive function call to handle a not unique slug
         generateSlug(); // Generate another one
     } else {
         return slug; // Finally return the slug
@@ -216,30 +222,33 @@ function generateSlug() {
 
 function checkForUniqueSlug(slug) {
     db.find({ slug: slug }, function (err, docs) {
-        console.log(docs.length);
-        return docs.length; // If docs.length > 1 there is an entry already, therefor the calling function will evaluate to false
+        console.log(`found ${docs.length} entries with slug ${slug}`);
+        return docs.length; // If docs.length > 0 there is an entry already, therefor the calling function will evaluate to false
     });
 }
 
+// eslint-disable-next-line no-unused-vars
 function auth(slug, key) {
-    db.find({slug: slug, key: key}, function(err, docs) {
+    db.find({ slug: slug, key: key }, function (err, docs) {
         console.log(`found entry with ${slug} and ${key}\nDoc: ${docs}`)
         return docs.length;
     });
 }
 
+// eslint-disable-next-line no-unused-vars
 function checkIfSlugExists(slug) {
-    db.find({slug: slug}, function(err, docs) {
+    db.find({ slug: slug }, function (err, docs) {
         console.log(`found ${docs.length} entries`);
         return docs.length;
         // return (docs.length > 0) ? false : true;
     });
 }
 
+// eslint-disable-next-line no-unused-vars
 function updateDatabase(slug, newSlug) {
-    db.update({ slug: slug }, { slug: newSlug}, {}, function (err, numReplaced) {
-        if(err) return false;
+    db.update({ slug: slug }, { slug: newSlug }, {}, function (err, numReplaced) {
+        if (err) return false;
         console.log(`numreplaced: ${numReplaced}`);
         return true;
-      });
+    });
 }
