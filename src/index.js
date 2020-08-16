@@ -27,6 +27,8 @@ const Datastore = require('nedb'),
 // Endpoint to create a shortened url
 app.get('/shorten', (req, res) => {
     let url = req.headers.url;
+    let key = null;
+    if(req.header('x-rapidapi-key')) key = req.header('x-rapidapi-key');
     if(!url) {
         res.send("No url specified"); // abort if url header is not set
         return;
@@ -40,7 +42,8 @@ app.get('/shorten', (req, res) => {
     storeInDB(url, slug);
     var shorturl = { // Object to be returned
         url: url,
-        short: `${process.env.BASE_URL}v/${slug}`
+        short: `${process.env.BASE_URL}v/${slug}`,
+        key: key
     }
     res.send(shorturl);
 });
@@ -98,6 +101,15 @@ app.get('/message', (req, res) => {
             }
         ]
     });
+});
+
+// Modify the slug after creation (only available for rapidapi pro users)
+app.get('/modify', (req, res) => {
+    if(req.header('x-rapidapi-key') == (undefined || null || "")) {
+        res.send("You have to be subscribed to the pro plan on rapidapi.com");
+        return;
+    }
+    res.send("Not yet implemented");
 });
 
 // shortfy.de returns the basic usage
