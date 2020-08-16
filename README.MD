@@ -3,18 +3,18 @@
 ## Shorten a url
 Make a GET request to /shorten and set the longurl as header "url"
 ```
-curl -H "url: https://google.com" https://shrtfy.de/shorten
+curl -H "url: https://google.com" http://shrtfy.de/shorten
 ```
 
 Optional: Set a slug as header "slug" to create your own (if not used yet)
 ```
-curl -H "url: https://google.com" -H "slug: google" https://shrtfy.de/shorten
+curl -H "url: https://google.com" -H "slug: google" http://shrtfy.de/shorten
 ```
 
 ## Retrieve an url
 Just open the link in your browser or get the redirect with curl
 ```
-curl https://shrtfy.de/v/${slug}
+curl http://shrtfy.de/v/${slug}
 ```
 
 ## Get API usage
@@ -26,7 +26,7 @@ curl https://shrtfy.de/
 ## Get information about the author
 Make a GET request to /info
 ```
-curl https://shrtfy.de/info
+curl http://shrtfy.de/info
 ```
 
 ## There are some more undocumented endpoints, though
