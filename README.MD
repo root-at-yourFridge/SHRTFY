@@ -30,3 +30,6 @@ curl https://shrtfy.de/info
 ```
 
 ## There are some more undocumented endpoints, though
+
+## dotenv configuration
+Rename .env.example to .env and change the values to your own values
