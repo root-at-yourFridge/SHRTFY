@@ -110,6 +110,11 @@ app.get('/custom', (req, res) => {
         return;
     }
 
+    if(slug.length < 4 || slug.length > 15) {
+        res.send("Slug must be between 4 and 15 characters long");
+        return;
+    }
+
     var schema = {
         url: url,
         slug: slug,
