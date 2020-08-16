@@ -2,8 +2,11 @@
 
 ## Shorten a url
 Make a GET request to /shorten and set the longurl as header "url"
+Optional: Set a slug as header "slug" to create your own (if not used yet)
 ```
 curl -H "url: https://google.com" https://shrtfy.de/shorten
+curl -H "url: https://google.com" -H "slug: google" https://shrtfy.de/shorten
+
 ```
 
 ## Retrieve an url
