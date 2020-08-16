@@ -150,7 +150,7 @@ app.get('/v/:slug', (req, res) => { // shrtfy.de/v/{random_code}
         var url = docs[0].url;
 
         // if header "noredir" is present redirect, else respond with object
-        (req.headers.noredir) ? res.redirect(url) : res.send({ slug: slug, url: url });
+        (req.headers.noredir != "true") ? res.redirect(url) : res.send({ slug: slug, url: url });
     });
 });
 
