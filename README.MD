@@ -24,16 +24,14 @@ curl http://shrtfy.de/get/${slug}
 ```
 
 ## Generate custom short url (only rapidapi pro)
-Make a GET request to /custom and set the headers url: longurl, slug: slug
-```
-curl -H "url: https://google.com" -H "slug: google" http://shrtfy.de/custom
-```
+Endpoint: /custom
+
+Not working with curl because there a specific secret headers to be set.
 
 ## Edit existing slug (only rapidapi pro)
-Make a PUT request to /edit and set the headers like below
-```
-curl -X PUT -H "slug: ${yourSlug}" -H "slug: ${newSlug}" http://shrtfy.de/edit
-```
+Endpoint: /edit
+
+Not working with curl because there a specific secret headers to be set.
 
 ## Get API usage
 Make a GET request to /
