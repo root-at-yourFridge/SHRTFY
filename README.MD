@@ -17,6 +17,12 @@ Optional: Set header 'noredir' to true to get an object returned
 curl -H "noredir: true" http://shrtfy.de/v/${slug}
 ```
 
+Optional: If you don't want to get redirected in the browser use endpoint /get
+Works in curl as well, so you don't need to set headers...
+```
+curl http://shrtfy.de/get/${slug}
+```
+
 ## Generate custom short url (only rapidapi pro)
 Make a GET request to /custom and set the headers url: longurl, slug: slug
 ```

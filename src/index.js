@@ -154,6 +154,21 @@ app.get('/v/:slug', (req, res) => { // shrtfy.de/v/{random_code}
     });
 });
 
+app.get('/get/:slug', (req, res) => { // shrtfy.de/v/{random_code}
+    var slug = req.params.slug;
+    db.find({ slug: slug }, function (err, docs) {
+        if (docs.length == 0) { // abort if slug not in database
+            res.send("Invalid slug");
+            return;
+        }
+        console.log(docs);
+        var url = docs[0].url;
+
+        // if header "noredir" is present redirect, else respond with object
+        res.send({ slug: slug, url: url });
+    });
+});
+
 // This is self-explainatory, isn't it?
 app.get('/info', (req, res) => {
     res.send({
@@ -188,7 +203,7 @@ app.get('/message', (req, res) => {
 });
 
 // Modify the slug after creation (only available for secret pro users)
-app.get('/edit', (req, res) => {
+app.put('/edit', (req, res) => {
     let publicKey; // init public key (not required)
     let slug; // init slug
     let newSlug;
