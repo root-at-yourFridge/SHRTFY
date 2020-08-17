@@ -77,7 +77,7 @@ app.get('/shorten', (req, res) => {
 
 app.get('/custom', (req, res) => {
     let url = req.headers.url; // url set in headers
-    let publicKey = null ; // init public key (not required)
+    let publicKey = null; // init public key (not required)
     let slug = null; // init slug
     if (req.header('slug')) { // check if header slug is set (not required)
         slug = req.header('slug');
@@ -110,7 +110,7 @@ app.get('/custom', (req, res) => {
         return;
     }
 
-    if(slug.length < 4 || slug.length > 15) {
+    if (slug.length < 4 || slug.length > 15) {
         res.send("Slug must be between 4 and 15 characters long");
         return;
     }
@@ -180,10 +180,6 @@ app.get('/message', (req, res) => {
                 content: "Huh!? You finally care 'bout me? I don't think so!"
             },
             {
-                receiver: "Michelle",
-                content: "I'm sorry for coding this much, I'm sorry for behaving like I do, I'm sorry for being this way. I'm trying as hard as I can. I really love you. Please forgive me for what I said when I was debugging my code <3"
-            },
-            {
                 receiver: "Employers",
                 content: "Please fucking hire me. I don't want to be a store manager in a grocery store 'til I can retire :("
             }
@@ -192,11 +188,14 @@ app.get('/message', (req, res) => {
 });
 
 // Modify the slug after creation (only available for secret pro users)
-/* app.get('/modify', (req, res) => {
-    let publicKey = null ; // init public key (not required)
-    let slug = null; // init slug
-    let newSlug = null;
+app.get('/edit', (req, res) => {
+    let publicKey; // init public key (not required)
+    let slug; // init slug
+    let newSlug;
+    let url;
+    let exists = false;
 
+    // Authentication
     console.log(process.env.SECRET_KEY);
     console.log(process.env.SECRET_VALUE);
     console.log(req.header(process.env.SECRET_KEY));
@@ -207,7 +206,7 @@ app.get('/message', (req, res) => {
     }
 
     if (req.header(process.env.PUBLIC_KEY)) {
-        publicKey = req.header(process.env.PUBLIC_KEY); // check if secret key is set
+        publicKey = req.header(process.env.PUBLIC_KEY); // check if public key is set
         console.log(req.header(process.env.PUBLIC_KEY));
     }
 
@@ -217,13 +216,47 @@ app.get('/message', (req, res) => {
     }
     slug = req.header('slug');
 
-    if(!req.header('newSlug')) { // check if header newSlug is set (required)
+    if (!req.header('newSlug')) { // check if header newSlug is set (required)
         res.send("You need to provide a new Slug");
         return;
     }
     newSlug = req.header('newSlug');
 
-    res.send("Edit");
+    db.find({ slug: slug, key: publicKey }, function (err, docs) {
+        console.log(`found entry with ${slug} and ${publicKey}\nDoc: ${docs}`);
+        exists = (docs.length > 0);
+        console.log(`dbfind: ${exists}`);
+        
+        if (exists) {
+            url = docs[0].url;
+            var schema = {
+                slug: newSlug,
+                key: publicKey,
+                url: url
+            };
+
+            db.insert(schema, function (err, newDoc) {
+                err ? console.log(`ERROR: ${err}`) : console.log("DONE");
+                console.log(newDoc);
+                if (newDoc == undefined) {
+                    res.send("The slug is already in use");
+                    return;
+                } else {
+                    console.log("newDoc is not undefined");
+                    var shorturl = { // Object to be returned
+                        url: url,
+                        short: `${process.env.BASE_URL}v/${newSlug}`,
+                        key: publicKey
+                    }
+                    res.send(shorturl);
+                    return;
+                }
+            });
+        } else {
+            res.status(401).send("Something isn't right here");
+            return;
+        }
+    });
 
 });
 
@@ -231,8 +264,8 @@ app.get('/test/:slug::key', (req, res) => {
     db.find({ slug: req.params.slug, key: req.params.key }, function (err, docs) {
         console.log(docs);
         res.send("docs");
-      });
-}); */
+    });
+});
 
 // shortfy.de returns the basic usage
 app.get('/', (req, res) => {
