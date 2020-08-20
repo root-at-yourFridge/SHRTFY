@@ -4,11 +4,12 @@
   "description": "Generate short urls via shrtfy.de, rapidapi.com or your own domain",
   "main": "src/index.js",
   "scripts": {
+    "start": "node src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",

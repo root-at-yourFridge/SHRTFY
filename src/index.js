@@ -1,4 +1,4 @@
-// I'm sorry for my inconsistent comments. I just dont't like to comment my code...
+// I'm sorry for my inconsistent comments. I just don't like to comment my code...
 
 
 // Add requirements
@@ -197,6 +197,10 @@ app.get('/message', (req, res) => {
             {
                 receiver: "Employers",
                 content: "Please fucking hire me. I don't want to be a store manager in a grocery store 'til I can retire :("
+            },
+            {
+                receiver: "Visitor",
+                content: "Welcome to SHRTFY. Feel free to shorten as many urls as you like. And if you know someone who might want to hire me, please refer them to this[2]"
             }
         ]
     });
@@ -295,6 +299,14 @@ app.get('/', (req, res) => {
             {
                 url: "/v",
                 usage: "/v/{slug} to retrieve the original (long) url"
+            },
+            {
+                url: "/custom",
+                usage: "You need to be subscribed via rapidapi.com to use this"
+            },
+            {
+                url: "/edit",
+                usage: "You need to be subscribed via rapidapi.com to use this"
             },
             {
                 url: "/info",
