@@ -186,7 +186,7 @@ app.get('/v/:slug', (req, res) => { // shrtfy.de/v/{random_code}
     var slug = req.params.slug;
     db.find({ slug: slug }, function (err, docs) {
         if (docs.length == 0) { // abort if slug not in database
-            res.status(400).send("Invalid slug");
+            res.status(404).send("Invalid slug");
             return;
         }
         console.log(docs);
@@ -225,6 +225,33 @@ app.get('/info', (req, res) => {
             github: "root-at-yourFridge"
         }
     });
+});
+
+app.get('/message/:receiver', (req, res) => {
+    let message = {
+        "Mom": "Hey mom, I hope I finally did something to make you proud",
+        "Dad": "Huh!? You finally care 'bout me? I don't think so!",
+        "Employers": "Please fucking hire me. I don't want to be a store manager in a grocery store 'til I can retire :(",
+        "Visitor": "Welcome to SHRTFY. Feel free to shorten as many urls as you like. And if you know someone who might want to hire me, please refer them to this[2]"
+    }
+
+    switch (req.params.receiver.toLocaleLowerCase()) {
+        case "mom":
+            res.status(200).send(message.Mom);
+            break;
+        case "dad":
+            res.status(200).send(message.Dad);
+            break;
+        case "employers":
+            res.status(200).send(message.Employers);
+            break;
+        case "visitor":
+            res.status(200).send(message.Visitor);
+            break;
+        default:
+            res.status(404).send("Message not found");
+    }
+    res.status(200).send();
 });
 
 // Undocumented endpoint because why not...
