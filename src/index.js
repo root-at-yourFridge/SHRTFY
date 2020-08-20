@@ -41,12 +41,12 @@ app.get('/shorten', (req, res) => {
     console.log(req.header(process.env.PUBLIC_KEY));
 
     if (!url) {
-        res.send("No url specified"); // abort if url header is not set
+        res.status(400).send("No url specified"); // abort if url header is not set
         return;
     }
 
     if (!url.match(regex)) {
-        res.send("Invalid url"); // abort if the given url is not in valid format
+        res.send(400).send("Invalid url"); // abort if the given url is not in valid format
         return;
     }
 
@@ -61,7 +61,7 @@ app.get('/shorten', (req, res) => {
         err ? console.log(`ERROR: ${err}`) : console.log("DONE");
         console.log(newDoc);
         if (newDoc == undefined) {
-            res.send("The slug is already in use");
+            res.status(500).send("The slug is already in use");
             return;
         } else {
             console.log("newDoc is not undefined");
@@ -70,7 +70,50 @@ app.get('/shorten', (req, res) => {
                 short: `${process.env.BASE_URL}v/${slug}`,
                 key: publicKey
             }
-            res.send(shorturl);
+            res.status(200).send(shorturl);
+        }
+    });
+});
+
+app.get('/shorten:url', (req, res) => {
+    let url = req.params.url; // url set in url
+    let publicKey = null; // init public key
+    let slug = null; // init slug
+
+    if (req.header(process.env.PUBLIC_KEY)) publicKey = req.header(process.env.PUBLIC_KEY); // check if public key is set
+    console.log(req.header(process.env.PUBLIC_KEY));
+
+    if (!url) {
+        res.status(400).send("No url specified"); // abort if url header is not set
+        return;
+    }
+
+    if (!url.match(regex)) {
+        res.status(400).send("Invalid url"); // abort if the given url is not in valid format
+        return;
+    }
+
+    slug = generateSlug();
+    var schema = {
+        url: url,
+        slug: slug,
+        key: publicKey
+    };
+
+    db.insert(schema, function (err, newDoc) {
+        err ? console.log(`ERROR: ${err}`) : console.log("DONE");
+        console.log(newDoc);
+        if (newDoc == undefined) {
+            res.status(500).send("The slug is already in use");
+            return;
+        } else {
+            console.log("newDoc is not undefined");
+            var shorturl = { // Object to be returned
+                url: url,
+                short: `${process.env.BASE_URL}v/${slug}`,
+                key: publicKey
+            }
+            res.status(200).send(shorturl);
         }
     });
 });
@@ -88,7 +131,7 @@ app.get('/custom', (req, res) => {
     console.log(req.header(process.env.SECRET_KEY));
     if (!req.header(process.env.SECRET_KEY) || !req.header(process.env.SECRET_KEY) == process.env.SECRET_VALUE) {
         console.log(req.header(process.env.SECRET_KEY));
-        res.send(process.env.SECRET_FAIL);
+        res.status(401).send(process.env.SECRET_FAIL);
         return;
     }
 
@@ -96,22 +139,22 @@ app.get('/custom', (req, res) => {
     console.log(req.header(process.env.PUBLIC_KEY));
 
     if (!url) {
-        res.send("No url specified"); // abort if url header is not set
+        res.status(400).send("No url specified"); // abort if url header is not set
         return;
     }
 
     if (!url.match(regex)) {
-        res.send("Invalid url"); // abort if the given url is not in valid format
+        res.status(400).send("Invalid url"); // abort if the given url is not in valid format
         return;
     }
 
     if (slug == null) {
-        res.send("Slug is required"); // abort if slug is not set
+        res.status(400).send("Slug is required"); // abort if slug is not set
         return;
     }
 
     if (slug.length < 4 || slug.length > 15) {
-        res.send("Slug must be between 4 and 15 characters long");
+        res.status(400).send("Slug must be between 4 and 15 characters long");
         return;
     }
 
@@ -125,7 +168,7 @@ app.get('/custom', (req, res) => {
         err ? console.log(`ERROR: ${err}`) : console.log("DONE");
         console.log(newDoc);
         if (newDoc == undefined) {
-            res.send("The slug is already in use");
+            res.status(500).send("The slug is already in use");
             return;
         } else {
             console.log("newDoc is not undefined");
@@ -134,7 +177,7 @@ app.get('/custom', (req, res) => {
                 short: `${process.env.BASE_URL}v/${slug}`,
                 key: publicKey
             }
-            res.send(shorturl);
+            res.status(200).send(shorturl);
         }
     });
 });
@@ -143,35 +186,38 @@ app.get('/v/:slug', (req, res) => { // shrtfy.de/v/{random_code}
     var slug = req.params.slug;
     db.find({ slug: slug }, function (err, docs) {
         if (docs.length == 0) { // abort if slug not in database
-            res.send("Invalid slug");
+            res.status(400).send("Invalid slug");
             return;
         }
         console.log(docs);
         var url = docs[0].url;
 
         // if header "noredir" is present redirect, else respond with object
-        (req.headers.noredir != "true") ? res.redirect(url) : res.send({ slug: slug, url: url });
+        (req.headers.noredir != "true") ? res.status(200).redirect(url) : res.status(200).send({ slug: slug, url: url });
     });
 });
 
 app.get('/get/:slug', (req, res) => { // shrtfy.de/v/{random_code}
+    res.status(501).send("Not yet implemented");
+    return;
+    // eslint-disable-next-line no-unreachable
     var slug = req.params.slug;
     db.find({ slug: slug }, function (err, docs) {
         if (docs.length == 0) { // abort if slug not in database
-            res.send("Invalid slug");
+            res.status(400).send("Invalid slug");
             return;
         }
         console.log(docs);
         var url = docs[0].url;
 
         // if header "noredir" is present redirect, else respond with object
-        res.send({ slug: slug, url: url });
+        res.status(200).send({ slug: slug, url: url });
     });
 });
 
 // This is self-explainatory, isn't it?
 app.get('/info', (req, res) => {
-    res.send({
+    res.status(200).send({
         author: "Dennis Wiencke",
         contact: {
             mail: "root@yourFridge.online",
@@ -183,7 +229,7 @@ app.get('/info', (req, res) => {
 
 // Undocumented endpoint because why not...
 app.get('/message', (req, res) => {
-    res.send({
+    res.status(200).send({
         sender: "Dennis Wiencke",
         messages: [
             {
@@ -220,7 +266,7 @@ app.put('/edit', (req, res) => {
     console.log(req.header(process.env.SECRET_KEY));
     if (!req.header(process.env.SECRET_KEY) || !req.header(process.env.SECRET_KEY) == process.env.SECRET_VALUE) {
         console.log(req.header(process.env.SECRET_KEY));
-        res.send(process.env.SECRET_FAIL);
+        res.status(401).send(process.env.SECRET_FAIL);
         return;
     }
 
@@ -230,13 +276,13 @@ app.put('/edit', (req, res) => {
     }
 
     if (!req.header('slug')) { // check if header slug is set (required)
-        res.send("You need to provide a slug to change");
+        res.status(400).send("You need to provide a slug to change");
         return;
     }
     slug = req.header('slug');
 
     if (!req.header('newSlug')) { // check if header newSlug is set (required)
-        res.send("You need to provide a new Slug");
+        res.status(400).send("You need to provide a new Slug");
         return;
     }
     newSlug = req.header('newSlug');
@@ -245,7 +291,7 @@ app.put('/edit', (req, res) => {
         console.log(`found entry with ${slug} and ${publicKey}\nDoc: ${docs}`);
         exists = (docs.length > 0);
         console.log(`dbfind: ${exists}`);
-        
+
         if (exists) {
             url = docs[0].url;
             var schema = {
@@ -258,7 +304,7 @@ app.put('/edit', (req, res) => {
                 err ? console.log(`ERROR: ${err}`) : console.log("DONE");
                 console.log(newDoc);
                 if (newDoc == undefined) {
-                    res.send("The slug is already in use");
+                    res.status(500).send("The slug is already in use");
                     return;
                 } else {
                     console.log("newDoc is not undefined");
@@ -267,7 +313,7 @@ app.put('/edit', (req, res) => {
                         short: `${process.env.BASE_URL}v/${newSlug}`,
                         key: publicKey
                     }
-                    res.send(shorturl);
+                    res.status(200).send(shorturl);
                     return;
                 }
             });
@@ -279,22 +325,23 @@ app.put('/edit', (req, res) => {
 
 });
 
-app.get('/test/:slug::key', (req, res) => {
-    db.find({ slug: req.params.slug, key: req.params.key }, function (err, docs) {
-        console.log(docs);
-        res.send("docs");
-    });
+app.get('/makeCoffee', (req, res) => {
+    res.status(418).send("I'm a teapot! I cannot brew coffee!");
+});
+
+app.get('/status/:code', (req, res) => {
+    res.status(req.params.code).send("See status in Insomnia!");
 });
 
 // shortfy.de returns the basic usage
 app.get('/', (req, res) => {
-    res.send({
+    res.status(200).send({
         name: "SHRTFY is short for shortify",
         desc: "Use this API to create shortened urls and retrieve the long url afterwards",
         endpoints: [
             {
                 url: "/shorten",
-                usage: "/shorten/{url} to get a short url for your input url"
+                usage: "/shorten/{url} to get a short url for your input url (currently only working with headers). Refer to https://github.com/root-at-yourFridge/SHRTFY/blob/master/README.MD for usage"
             },
             {
                 url: "/v",
@@ -333,31 +380,5 @@ function checkForUniqueSlug(slug) {
     db.find({ slug: slug }, function (err, docs) {
         console.log(`found ${docs.length} entries with slug ${slug}`);
         return docs.length; // If docs.length > 0 there is an entry already, therefor the calling function will evaluate to false
-    });
-}
-
-// eslint-disable-next-line no-unused-vars
-function auth(slug, key) {
-    db.find({ slug: slug, key: key }, function (err, docs) {
-        console.log(`found entry with ${slug} and ${key}\nDoc: ${docs}`)
-        return docs.length;
-    });
-}
-
-// eslint-disable-next-line no-unused-vars
-function checkIfSlugExists(slug) {
-    db.find({ slug: slug }, function (err, docs) {
-        console.log(`found ${docs.length} entries`);
-        return docs.length;
-        // return (docs.length > 0) ? false : true;
-    });
-}
-
-// eslint-disable-next-line no-unused-vars
-function updateDatabase(slug, newSlug) {
-    db.update({ slug: slug }, { slug: newSlug }, {}, function (err, numReplaced) {
-        if (err) return false;
-        console.log(`numreplaced: ${numReplaced}`);
-        return true;
     });
 }
