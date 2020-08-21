@@ -134,6 +134,7 @@ app.get('/custom', (req, res) => {
     console.log(req.header(process.env.SECRET_KEY));
     if (!req.header(process.env.SECRET_KEY) || !req.header(process.env.SECRET_KEY) == process.env.SECRET_VALUE) {
         console.log(req.header(process.env.SECRET_KEY));
+        // res.status(401).sendFile('/home/dennis/Dokumente/git/SHRTFY/assets/401.jpg');
         res.status(401).send(process.env.SECRET_FAIL);
         return;
     }
@@ -220,6 +221,7 @@ app.get('/get/:slug', (req, res) => { // shrtfy.de/v/{random_code}
 
 // This is self-explainatory, isn't it?
 app.get('/info', (req, res) => {
+    res.set('X-Powered-By', 'Samsung SmartFridge');
     res.status(200).send({
         author: "Dennis Wiencke",
         contact: {
