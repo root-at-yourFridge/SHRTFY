@@ -61,7 +61,7 @@ app.get('/shorten', (req, res) => {
         err ? console.log(`ERROR: ${err}`) : console.log("DONE");
         console.log(newDoc);
         if (newDoc == undefined) {
-            res.status(500).send("The slug is already in use");
+            res.status(406).send("The slug is already in use");
             return;
         } else {
             console.log("newDoc is not undefined");
@@ -75,7 +75,10 @@ app.get('/shorten', (req, res) => {
     });
 });
 
-app.get('/shorten:url', (req, res) => {
+app.get('/shorten/:url', (req, res) => {
+    res.status(501).send("Not yet implemented");
+    return;
+    // eslint-disable-next-line no-unreachable
     let url = req.params.url; // url set in url
     let publicKey = null; // init public key
     let slug = null; // init slug
@@ -84,7 +87,7 @@ app.get('/shorten:url', (req, res) => {
     console.log(req.header(process.env.PUBLIC_KEY));
 
     if (!url) {
-        res.status(400).send("No url specified"); // abort if url header is not set
+        res.status(400).send("No url specified"); // abort if url  is not set
         return;
     }
 
