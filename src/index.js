@@ -157,8 +157,8 @@ app.get('/custom', (req, res) => {
         return;
     }
 
-    if (slug.length < 4 || slug.length > 15) {
-        res.status(400).send("Slug must be between 4 and 15 characters long");
+    if (slug.length < 4 || slug.length > 25) { // check length of slug
+        res.status(400).send("Slug must be between 4 and 25 characters long");
         return;
     }
 
