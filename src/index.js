@@ -7,6 +7,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const fs = require('fs');
+const https = require('fs');
 const randomstring = require('randomstring');
 // eslint-disable-next-line no-unused-vars
 const dotenv = require('dotenv').config();
@@ -396,7 +398,14 @@ app.get('/', (req, res) => {
 });
 
 app.listen(process.env.PORT, process.env.IP_ADDR, () => {
-    console.log('listening on port 80');
+    console.log(`listening on ${process.env.IP_ADDR}:${process.env.PORT}`);
+});
+
+https.createServer({
+    key: fs.readFileSync(process.env.KEY_PATH),
+    cert: fs.readFileSync(process.env.CERT_PATH)
+}, app).listen(process.env.SSL_PORT, process.env.IP_ADDR, () => {
+    console.log(`listening on ${process.env.IP_ADDR}:${process.env.SSL_PORT}`);
 });
 
 function generateSlug() {
