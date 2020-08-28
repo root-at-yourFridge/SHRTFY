@@ -402,8 +402,8 @@ app.listen(process.env.PORT, process.env.IP_ADDR, () => {
 });
 
 https.createServer({
-    key: fs.readFileSync("/etc/letsencrypt/live/shrtfy.de/privkey.pem"),
-    cert: fs.readFileSync("/etc/letsencrypt/live/shrtfy.de/fullchain.pem")
+    key: fs.readFileSync(process.env.KEY_PATH),
+    cert: fs.readFileSync(process.env.CERT_PATH)
 }, app).listen(process.env.HTTPS_PORT, process.env.IP_ADDR, () => {
     console.log(`listening on ${process.env.IP_ADDR}:${process.env.HTTPS_PORT}`);
 });
