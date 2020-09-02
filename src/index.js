@@ -142,9 +142,10 @@ app.get('/custom', (req, res) => {
     }
 
     if (req.header(process.env.PUBLIC_KEY)) publicKey = req.header(process.env.PUBLIC_KEY); // check if secret key is set
-    console.log(req.header(process.env.PUBLIC_KEY));
+        console.log(req.header(process.env.PUBLIC_KEY));
+        publicKey = req.header(process.env.PUBLIC_KEY)
 
-    if (!url) {
+    if (url.length < 8) {
         res.status(400).send("No url specified"); // abort if url header is not set
         return;
     }
@@ -174,7 +175,7 @@ app.get('/custom', (req, res) => {
         err ? console.log(`ERROR: ${err}`) : console.log("DONE");
         console.log(newDoc);
         if (newDoc == undefined) {
-            res.status(500).send("The slug is already in use");
+            res.status(417).send("The slug is already in use");
             return;
         } else {
             console.log("newDoc is not undefined");
@@ -286,7 +287,7 @@ app.get('/message', (req, res) => {
     });
 });
 
-// Modify the slug after creation (only available for secret pro users)
+// Modify the slug after creation (only available for rapidapi pro users)
 app.put('/edit', (req, res) => {
     let publicKey; // init public key (not required)
     let slug; // init slug
@@ -338,7 +339,7 @@ app.put('/edit', (req, res) => {
                 err ? console.log(`ERROR: ${err}`) : console.log("DONE");
                 console.log(newDoc);
                 if (newDoc == undefined) {
-                    res.status(500).send("The slug is already in use");
+                    res.status(417).send("The slug is already in use");
                     return;
                 } else {
                     console.log("newDoc is not undefined");
@@ -401,12 +402,12 @@ app.listen(process.env.PORT, process.env.IP_ADDR, () => {
     console.log(`listening on ${process.env.IP_ADDR}:${process.env.PORT}`);
 });
 
-https.createServer({
-    key: fs.readFileSync(process.env.KEY_PATH),
-    cert: fs.readFileSync(process.env.CERT_PATH)
-}, app).listen(process.env.HTTPS_PORT, process.env.IP_ADDR, () => {
-    console.log(`listening on ${process.env.IP_ADDR}:${process.env.HTTPS_PORT}`);
-});
+// https.createServer({
+//     key: fs.readFileSync(process.env.KEY_PATH),
+//     cert: fs.readFileSync(process.env.CERT_PATH)
+// }, app).listen(process.env.HTTPS_PORT, process.env.IP_ADDR, () => {
+//     console.log(`listening on ${process.env.IP_ADDR}:${process.env.HTTPS_PORT}`);
+// });
 function generateSlug() {
     let slug = randomstring.generate(7); // Generate a random string with length = 7
     if (checkForUniqueSlug(slug) > 0) { // Recursive function call to handle a not unique slug
