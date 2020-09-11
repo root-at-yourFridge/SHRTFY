@@ -10,9 +10,19 @@ const morgan = require('morgan');
 const fs = require('fs');
 const https = require('https');
 const randomstring = require('randomstring');
+const app = express();
+
+// Initialize varivables from .env
 // eslint-disable-next-line no-unused-vars
 const dotenv = require('dotenv').config();
-const app = express();
+const IP_ADDR = process.env.IP_ADDR;
+const PORT = process.env.PORT;
+const HTTPS_PORT = process.env.HTTPS_PORT;
+const PUBLIC_KEY = process.env.PUBLIC_KEY;
+const BASE_URL = process.env.BASE_URL;
+const SECRET_KEY = process.env.SECRET_KEY;
+const SECRET_VALUE = process.env.SECRET_VALUE;
+const SECRET_FAIL = process.env.SECRET_FAIL;
 
 // Regex for checking if the given url is in a valid format with protocol
 const expression = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[+~%/.\w-_]*)?\??(?:[-+=&;%@.\w_]*)#?(?:[\w]*))?)/gi
@@ -39,8 +49,8 @@ app.get('/shorten', (req, res) => {
     let publicKey = null; // init public key
     let slug = null; // init slug
 
-    if (req.header(process.env.PUBLIC_KEY)) publicKey = req.header(process.env.PUBLIC_KEY); // check if public key is set
-    console.log(req.header(process.env.PUBLIC_KEY));
+    if (req.header(PUBLIC_KEY)) publicKey = req.header(PUBLIC_KEY); // check if public key is set
+    console.log(req.header(PUBLIC_KEY));
 
     if (!url) {
         res.status(400).send("No url specified"); // abort if url header is not set
@@ -69,7 +79,7 @@ app.get('/shorten', (req, res) => {
             console.log("newDoc is not undefined");
             var shorturl = { // Object to be returned
                 url: url,
-                short: `${process.env.BASE_URL}v/${slug}`,
+                short: `${BASE_URL}v/${slug}`,
                 key: publicKey
             }
             res.status(200).send(shorturl);
@@ -85,8 +95,8 @@ app.get('/shorten/:url', (req, res) => {
     let publicKey = null; // init public key
     let slug = null; // init slug
 
-    if (req.header(process.env.PUBLIC_KEY)) publicKey = req.header(process.env.PUBLIC_KEY); // check if public key is set
-    console.log(req.header(process.env.PUBLIC_KEY));
+    if (req.header(PUBLIC_KEY)) publicKey = req.header(PUBLIC_KEY); // check if public key is set
+    console.log(req.header(PUBLIC_KEY));
 
     if (!url) {
         res.status(400).send("No url specified"); // abort if url  is not set
@@ -115,7 +125,7 @@ app.get('/shorten/:url', (req, res) => {
             console.log("newDoc is not undefined");
             var shorturl = { // Object to be returned
                 url: url,
-                short: `${process.env.BASE_URL}v/${slug}`,
+                short: `${BASE_URL}v/${slug}`,
                 key: publicKey
             }
             res.status(200).send(shorturl);
@@ -131,19 +141,19 @@ app.get('/custom', (req, res) => {
         slug = req.header('slug');
     }
 
-    console.log(process.env.SECRET_KEY);
-    console.log(process.env.SECRET_VALUE);
-    console.log(req.header(process.env.SECRET_KEY));
-    if (!req.header(process.env.SECRET_KEY) || !req.header(process.env.SECRET_KEY) == process.env.SECRET_VALUE) {
-        console.log(req.header(process.env.SECRET_KEY));
+    console.log(SECRET_KEY);
+    console.log(SECRET_VALUE);
+    console.log(req.header(SECRET_KEY));
+    if (!req.header(SECRET_KEY) || !req.header(SECRET_KEY) == SECRET_VALUE) {
+        console.log(req.header(SECRET_KEY));
         // res.status(401).sendFile('/home/dennis/Dokumente/git/SHRTFY/assets/401.jpg');
-        res.status(401).send(process.env.SECRET_FAIL);
+        res.status(401).send(SECRET_FAIL);
         return;
     }
 
-    if (req.header(process.env.PUBLIC_KEY)) publicKey = req.header(process.env.PUBLIC_KEY); // check if secret key is set
-        console.log(req.header(process.env.PUBLIC_KEY));
-        publicKey = req.header(process.env.PUBLIC_KEY)
+    if (req.header(PUBLIC_KEY)) publicKey = req.header(PUBLIC_KEY); // check if secret key is set
+        console.log(req.header(PUBLIC_KEY));
+        publicKey = req.header(PUBLIC_KEY)
 
     if (url.length < 8) {
         res.status(400).send("No url specified"); // abort if url header is not set
@@ -181,7 +191,7 @@ app.get('/custom', (req, res) => {
             console.log("newDoc is not undefined");
             var shorturl = { // Object to be returned
                 url: url,
-                short: `${process.env.BASE_URL}v/${slug}`,
+                short: `${BASE_URL}v/${slug}`,
                 key: publicKey
             }
             res.status(200).send(shorturl);
@@ -224,7 +234,7 @@ app.get('/get/:slug', (req, res) => { // shrtfy.de/v/{random_code}
 
 // This is self-explainatory, isn't it?
 app.get('/info', (req, res) => {
-    res.set('X-Powered-By', 'Samsung SmartFridge');
+    res.set('X-Powered-By', 'Rockstar Blue Raspberry');
     res.status(200).send({
         author: "Dennis Wiencke",
         contact: {
@@ -296,18 +306,18 @@ app.put('/edit', (req, res) => {
     let exists = false;
 
     // Authentication
-    console.log(process.env.SECRET_KEY);
-    console.log(process.env.SECRET_VALUE);
-    console.log(req.header(process.env.SECRET_KEY));
-    if (!req.header(process.env.SECRET_KEY) || !req.header(process.env.SECRET_KEY) == process.env.SECRET_VALUE) {
-        console.log(req.header(process.env.SECRET_KEY));
-        res.status(401).send(process.env.SECRET_FAIL);
+    console.log(SECRET_KEY);
+    console.log(SECRET_VALUE);
+    console.log(req.header(SECRET_KEY));
+    if (!req.header(SECRET_KEY) || !req.header(SECRET_KEY) == SECRET_VALUE) {
+        console.log(req.header(SECRET_KEY));
+        res.status(401).send(SECRET_FAIL);
         return;
     }
 
-    if (req.header(process.env.PUBLIC_KEY)) {
-        publicKey = req.header(process.env.PUBLIC_KEY); // check if public key is set
-        console.log(req.header(process.env.PUBLIC_KEY));
+    if (req.header(PUBLIC_KEY)) {
+        publicKey = req.header(PUBLIC_KEY); // check if public key is set
+        console.log(req.header(PUBLIC_KEY));
     }
 
     if (!req.header('slug')) { // check if header slug is set (required)
@@ -345,7 +355,7 @@ app.put('/edit', (req, res) => {
                     console.log("newDoc is not undefined");
                     var shorturl = { // Object to be returned
                         url: url,
-                        short: `${process.env.BASE_URL}v/${newSlug}`,
+                        short: `${BASE_URL}v/${newSlug}`,
                         key: publicKey
                     }
                     res.status(200).send(shorturl);
@@ -364,6 +374,7 @@ app.get('/makeCoffee', (req, res) => {
     res.status(418).send("I'm a teapot! I cannot brew coffee!");
 });
 
+// Why? I don't know
 app.get('/status/:code', (req, res) => {
     res.status(req.params.code).send("See status in Insomnia!");
 });
@@ -398,15 +409,15 @@ app.get('/', (req, res) => {
     });
 });
 
-app.listen(process.env.PORT, process.env.IP_ADDR, () => {
-    console.log(`listening on ${process.env.IP_ADDR}:${process.env.PORT}`);
+app.listen(PORT, IP_ADDR, () => {
+    console.log(`listening on ${IP_ADDR}:${PORT}`);
 });
 
 https.createServer({
-    key: fs.readFileSync(process.env.KEY_PATH),
-    cert: fs.readFileSync(process.env.CERT_PATH)
-}, app).listen(process.env.HTTPS_PORT, process.env.IP_ADDR, () => {
-    console.log(`listening on ${process.env.IP_ADDR}:${process.env.HTTPS_PORT}`);
+    key: fs.readFileSync(KEY_PATH),
+    cert: fs.readFileSync(CERT_PATH)
+}, app).listen(HTTPS_PORT, IP_ADDR, () => {
+    console.log(`listening on ${IP_ADDR}:${HTTPS_PORT}`);
 });
 function generateSlug() {
     let slug = randomstring.generate(7); // Generate a random string with length = 7
