@@ -13,5 +13,7 @@
 
 ## Possibly
 [ ] Implement a function to notify on link visit (like grabify)
+
 	[ ] Email
+	
 	[ ] SMS with twilio(?) (Premium only, if implemented)
