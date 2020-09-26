@@ -1,4 +1,5 @@
 // I'm sorry for my inconsistent comments. I just don't like to comment my code...
+// That doesn't mean I don't understand it, though :D
 
 
 // Add requirements
@@ -25,6 +26,7 @@ const SECRET_VALUE = process.env.SECRET_VALUE;
 const SECRET_FAIL = process.env.SECRET_FAIL;
 
 // Regex for checking if the given url is in a valid format with protocol
+// e.g. protocol://domain.tld
 const expression = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[+~%/.\w-_]*)?\??(?:[-+=&;%@.\w_]*)#?(?:[\w]*))?)/gi
 var regex = new RegExp(expression);
 
@@ -38,6 +40,8 @@ app.use(express.static(__dirname, { dotfiles: 'allow' }));
 // Set database to connect to
 const Datastore = require('nedb'),
     db = new Datastore({ filename: './db/urls.db', autoload: true });
+
+// Create unique key for fiel "slug" to prevent multiple uses of a slug
 db.ensureIndex({
     fieldName: "slug",
     unique: true
@@ -69,6 +73,7 @@ app.get('/shorten', (req, res) => {
         key: publicKey
     };
 
+    // Insert entty into the database
     db.insert(schema, function (err, newDoc) {
         err ? console.log(`ERROR: ${err}`) : console.log("DONE");
         console.log(newDoc);
