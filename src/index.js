@@ -392,7 +392,7 @@ app.get('/', (req, res) => {
         endpoints: [
             {
                 url: "/shorten",
-                usage: "/shorten/{url} to get a short url for your input url (currently only working with headers). Refer to https://github.com/root-at-yourFridge/SHRTFY/blob/master/README.MD for usage"
+                usage: "/shorten/{url} to get a short url for your input url (currently only working with headers). Refer to https://shrtfy.de/v/readme for usage"
             },
             {
                 url: "/v",
