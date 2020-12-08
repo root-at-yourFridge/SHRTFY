@@ -3,24 +3,25 @@
 ## Shorten a url
 Make a GET request to /shorten and set the longurl as header "url"
 ```
-curl -H "url: https://google.com" http://shrtfy.de/shorten
+curl -H "url: https://google.com" https://shrtfy.de/shorten
 ```
 
 ## Retrieve an url
 Just open the link in your browser or get the redirect with curl
 ```
-curl http://shrtfy.de/v/${slug}
+curl https://shrtfy.de/v/${slug}
 ```
 
 Optional: Set header 'noredir' to true to get an object returned
 ```
-curl -H "noredir: true" http://shrtfy.de/v/${slug}
+curl -H "noredir: true" https://shrtfy.de/v/${slug}
 ```
 
+DOES NOT WORK BECAUSE I DON'T KNOW YET!
 Optional: If you don't want to get redirected in the browser use endpoint /get
 Works in curl as well, so you don't need to set headers...
 ```
-curl http://shrtfy.de/get/${slug}
+curl https://shrtfy.de/get/${slug}
 ```
 
 ## Generate custom short url (only rapidapi pro)
@@ -42,7 +43,7 @@ curl https://shrtfy.de/
 ## Get information about the author
 Make a GET request to /info
 ```
-curl http://shrtfy.de/info
+curl https://shrtfy.de/info
 ```
 
 ## There are some more undocumented endpoints, though
