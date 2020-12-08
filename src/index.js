@@ -24,6 +24,8 @@ const BASE_URL = process.env.BASE_URL;
 const SECRET_KEY = process.env.SECRET_KEY;
 const SECRET_VALUE = process.env.SECRET_VALUE;
 const SECRET_FAIL = process.env.SECRET_FAIL;
+const KEY_PATH = process.env.KEY_PATH;
+const CERT_PATH = process.env.CERT_PATH;
 
 // Regex for checking if the given url is in a valid format with protocol
 // e.g. protocol://domain.tld
