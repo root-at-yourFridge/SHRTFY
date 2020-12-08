@@ -220,8 +220,8 @@ app.get('/v/:slug', (req, res) => { // shrtfy.de/v/{random_code}
 });
 
 app.get('/get/:slug', (req, res) => { // shrtfy.de/v/{random_code}
-    res.status(501).send("Not yet implemented");
-    return;
+    //res.status(501).send("Not yet implemented");
+    //return;
     // eslint-disable-next-line no-unreachable
     var slug = req.params.slug;
     db.find({ slug: slug }, function (err, docs) {
